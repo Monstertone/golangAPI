@@ -7,23 +7,16 @@ import (
   "database/sql"
   "encoding/json"
   "net/http"
+  "goAPI/models"
   "github.com/gorilla/mux"
   "github.com/lib/pq"
   "github.com/subosito/gotenv"
 
-
-
 )
 
-type Transaction struct {
-  ID             int     `json:id`
-  Amount         int     `json:amount`
-  Business_name  string  `json:business_name`
-  Type_trans     string  `json:type`
-  Users_ID       int     `json:users_id`
-}
 
-var transactions []Transaction
+
+var transactions []models.Transaction
 var db *sql.DB
 
 func init(){
@@ -61,8 +54,8 @@ func main() {
 }
 
 func getTransactions(w http.ResponseWriter, r *http.Request) {
-  var transaction Transaction
-  transactions = []Transaction{}
+  var transaction models.Transaction
+  transactions = []models.Transaction{}
 
   rows, err := db.Query("select * from transactions")
   logFatal(err)
@@ -79,7 +72,7 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 }
 
 func getTransaction(w http.ResponseWriter, r *http.Request) {
-  var transaction Transaction
+  var transaction models.Transaction
   params := mux.Vars(r)
 
   rows := db.QueryRow("select * from transactions where id=$1", params["id"])
@@ -93,7 +86,7 @@ func getTransaction(w http.ResponseWriter, r *http.Request) {
 }
 
 func addTransaction(w http.ResponseWriter, r *http.Request) {
-  var transaction Transaction
+  var transaction models.Transaction
   var transactionID int
 
   json.NewDecoder(r.Body).Decode(&transaction)
@@ -108,7 +101,7 @@ func addTransaction(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateTransaction(w http.ResponseWriter, r *http.Request) {
-  var transaction Transaction
+  var transaction models.Transaction
   json.NewDecoder(r.Body).Decode(&transaction)
 
   result, err := db.Exec("update transactions set amount=$1, business_name=$2, type_trans=$3, users_id=$4 where id=$5 RETURNING id",
